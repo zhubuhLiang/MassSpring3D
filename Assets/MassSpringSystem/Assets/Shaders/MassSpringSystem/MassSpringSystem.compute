@@ -1,4 +1,26 @@
 ﻿/**
+ * Copyright 2020 DrSamatha
+ *
+ * This is a 3D modification of the UnityMassSpringSystem, allowing Mass Spring effect of 3D chunks.
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+ * documentation files (the "Software"), to deal in the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute, sublicense copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so, subject to the following
+ * conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial
+ * portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+ * LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
+ * EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+ * USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+
+/**
  * Copyright 2017 Sean Soraghan
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
@@ -177,16 +199,7 @@ void CSMainVel (uint3 id : SV_DispatchThreadID)
     int2 bottomWestNeighbour = neighboursBuffer[idx].neighbours[22];
     int2 bottomBendNeighbour = neighboursBuffer[idx].neighbours[23];
 
-    // if I turn things below to if-structure, less computation is needed.
-    /** Our grid is structured to have rigid, non-moving edges.
-     */
-    //const float notEdge = (float)(northBendNeighbour.y && eastBendNeighbour.y && westBendNeighbour.y && southBendNeighbour.y);
-    //const float notEdge = (float)(northNeighbour.y && eastNeighbour.y && westNeighbour.y && southNeighbour.y);
-    //const float notEdge = 1.0f;
-    //const float notEdge = (idx != thread_group_size_x * thread_group_size_y * layers -1) && (idx != 0)  ? 1.0f : 0.0f;  
-    //const float notEdge = (idx != 0) ? 1.0f : 0.0f;
     const float notEdge = (northNeighbour.y + eastNeighbour.y + westNeighbour.y + southNeighbour.y + topNeighbour.y + bottomNeighbour.y) > 3 ? 1.0f : 0.0f;
-
     const float numDiagonal = 1.414f;  //1.414f
     const float numBend = 2.0f;        // 2.0f
     
@@ -216,21 +229,6 @@ void CSMainVel (uint3 id : SV_DispatchThreadID)
     const float3 bottomSouthForce = getForceForNeighbour(idx, bottomSouthNeighbour, stiffness, springLength * numDiagonal, damping);
     const float3 bottomWestForce = getForceForNeighbour(idx, bottomWestNeighbour, stiffness, springLength * numDiagonal, damping);
     const float3 bottomBendForce = getForceForNeighbour(idx, bottomBendNeighbour, stiffness, springLength * numBend, damping);
-
-    //const float3 topForce = float3 (0.0f, 0.0f, 0.0f);      //trouble
-    //const float3 topNorthForce = float3 (0.0f, 0.0f, 0.0f);  //ok
-    //const float3 topEastForce = float3 (0.0f, 0.0f, 0.0f); //ok
-    //const float3 topSouthForce = float3 (0.0f, 0.0f, 0.0f); // trouble
-    //const float3 topWestForce = float3 (0.0f, 0.0f, 0.0f);   // trouble
-    //const float3 topBendForce = float3 (0.0f, 0.0f, 0.0f);    // trouble
-    //const float3 bottomForce = float3 (0.0f, 0.0f, 0.0f);     // trouble
-    //const float3 bottomNorthForce = float3 (0.0f, 0.0f, 0.0f);  //ok  
-    //const float3 bottomEastForce = float3 (0.0f, 0.0f, 0.0f);   //okay
-    //const float3 bottomSouthForce = float3 (0.0f, 0.0f, 0.0f);  //trouble
-    //const float3 bottomWestForce = float3 (0.0f, 0.0f, 0.0f);  // trouble
-    //const float3 bottomBendForce = float3 (0.0f, 0.0f, 0.0f);  // trouble
-
-
 
     const float3 internalForce = (northForce + eastForce + westForce + southForce +
         northEastForce + northWestForce + southEastForce + southWestForce +
